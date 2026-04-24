@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2016 政治獻金排行榜</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap');
+        
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+
+        .hero-gradient {
+            background: linear-gradient(rgba(15, 23, 42, 0.9), rgba(15, 23, 42, 0.95)), 
+                        url('https://images.unsplash.com/photo-1590233461424-df38d2bc0094?auto=format&fit=crop&q=80&w=1600');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .party-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+        }
+
+        .transition-page {
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .hidden-page {
+            display: none;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .rank-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            font-size: 0.875rem;
+            font-weight: 700;
+        }
+
+        .rank-1 { background-color: #fbbf24; color: #78350f; }
+        .rank-2 { background-color: #cbd5e1; color: #334155; }
+        .rank-3 { background-color: #b45309; color: #fff; }
+    </style>
+</head>
+<body>
+
+    <!-- 導航欄 -->
+    <nav class="fixed top-0 w-full z-50 bg-white/90 backdrop-blur-md border-b border-slate-200">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center gap-2 cursor-pointer" onclick="showPage('landing')">
+                <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center text-white font-bold">金</div>
+                <span class="text-xl font-bold tracking-tight">2016 獻金排行</span>
+            </div>
+            <div class="flex gap-4 md:gap-8 text-sm font-medium">
+                <button onclick="showPage('landing')" class="text-slate-600 hover:text-indigo-600">首頁</button>
+                <button onclick="filterByParty('all')" class="text-slate-600 hover:text-indigo-600">所有排行</button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Landing Page (專題首頁) -->
+    <main id="landing-page" class="transition-page pt-16">
+        <!-- Hero Section -->
+        <section class="hero-gradient text-white py-24 px-4">
+            <div class="max-w-5xl mx-auto text-center">
+                <h1 class="text-4xl md:text-6xl font-bold mb-6 tracking-tight">誰是 2016 的吸金王？</h1>
+                <p class="text-lg text-slate-300 mb-12 max-w-2xl mx-auto">
+                    不搜尋，直接看。我們整理了各政黨候選人的政治獻金排行榜，
+                    揭露政壇錢脈的分佈與流向。
+                </p>
+                
+                <!-- 政黨快速入口 -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+                    <div onclick="filterByParty('民主進步黨')" class="party-card bg-white/10 border border-white/20 p-6 rounded-2xl cursor-pointer transition-all hover:bg-white/20">
+                        <div class="text-3xl mb-2">🟢</div>
+                        <h3 class="font-bold text-xl">民主進步黨</h3>
+                        <p class="text-xs text-slate-400 mt-2">執政黨數據總覽</p>
+                    </div>
+                    <div onclick="filterByParty('中國國民黨')" class="party-card bg-white/10 border border-white/20 p-6 rounded-2xl cursor-pointer transition-all hover:bg-white/20">
+                        <div class="text-3xl mb-2">🔵</div>
+                        <h3 class="font-bold text-xl">中國國民黨</h3>
+                        <p class="text-xs text-slate-400 mt-2">在野陣營金流</p>
+                    </div>
+                    <div onclick="filterByParty('時代力量')" class="party-card bg-white/10 border border-white/20 p-6 rounded-2xl cursor-pointer transition-all hover:bg-white/20">
+                        <div class="text-3xl mb-2">🟡</div>
+                        <h3 class="font-bold text-xl">時代力量</h3>
+                        <p class="text-xs text-slate-400 mt-2">新興勢力規模</p>
+                    </div>
+                    <div onclick="filterByParty('all')" class="party-card bg-white/10 border border-white/20 p-6 rounded-2xl cursor-pointer transition-all hover:bg-white/20">
+                        <div class="text-3xl mb-2">📊</div>
+                        <h3 class="font-bold text-xl">全政黨排行</h3>
+                        <p class="text-xs text-slate-400 mt-2">跨黨派實力對決</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 熱門議題精選 -->
+        <section class="max-w-7xl mx-auto py-20 px-4">
+            <h2 class="text-2xl font-bold mb-10 flex items-center gap-2">
+                <span class="w-2 h-8 bg-indigo-600 rounded-full"></span>
+                編輯推薦：特定屬性排行榜
+            </h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div onclick="applyQuickSort('business-desc')" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all cursor-pointer">
+                    <h3 class="text-xl font-bold mb-3 group-hover:text-indigo-600">企業最愛候選人榜</h3>
+                    <p class="text-slate-500 text-sm">統計「營利事業捐贈」比例最高的前十名候選人...</p>
+                    <div class="mt-6 text-indigo-600 font-bold text-sm">點擊查看排行 →</div>
+                </div>
+                <div onclick="applyQuickSort('personal-desc')" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all cursor-pointer">
+                    <h3 class="text-xl font-bold mb-3 group-hover:text-indigo-600">草根力量：小額捐贈榜</h3>
+                    <p class="text-slate-500 text-sm">誰最受個人支持？分析個人捐贈佔比最高的前十名...</p>
+                    <div class="mt-6 text-indigo-600 font-bold text-sm">點擊查看排行 →</div>
+                </div>
+                <div onclick="applyQuickSort('total-desc')" class="group bg-white p-8 rounded-3xl border border-slate-100 shadow-sm hover:shadow-xl transition-all cursor-pointer">
+                    <h3 class="text-xl font-bold mb-3 group-hover:text-indigo-600">2016 總吸金王者</h3>
+                    <p class="text-slate-500 text-sm">不分黨派，總獻金收入最高的絕對排名...</p>
+                    <div class="mt-6 text-indigo-600 font-bold text-sm">點擊查看排行 →</div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Results List Page -->
+    <main id="result-page" class="hidden-page transition-page pt-24 pb-20">
+        <div class="max-w-7xl mx-auto px-4">
+            
+            <div class="mb-10">
+                <button onclick="showPage('landing')" class="text-indigo-600 text-sm font-bold mb-2 flex items-center gap-1">
+                    ← 返回政黨選擇
+                </button>
+                <h2 id="result-title" class="text-3xl font-bold text-slate-900">所有政黨排行</h2>
+            </div>
+
+            <!-- 關鍵摘要數據 -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+                <div class="bg-indigo-600 text-white p-6 rounded-2xl shadow-lg shadow-indigo-200">
+                    <p class="text-indigo-100 text-xs mb-1 uppercase tracking-wider font-bold">榜單人數</p>
+                    <h3 id="stat-count" class="text-3xl font-bold">0</h3>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm">
+                    <p class="text-slate-400 text-xs mb-1 uppercase font-bold">累計總收受金額</p>
+                    <h3 id="stat-total" class="text-2xl font-bold text-slate-800">0</h3>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-emerald-500">
+                    <p class="text-slate-400 text-xs mb-1 uppercase font-bold">平均個人捐贈</p>
+                    <h3 id="stat-personal-avg" class="text-2xl font-bold text-emerald-600">0%</h3>
+                </div>
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm border-t-4 border-t-amber-500">
+                    <p class="text-slate-400 text-xs mb-1 uppercase font-bold">平均企業捐贈</p>
+                    <h3 id="stat-business-avg" class="text-2xl font-bold text-amber-600">0%</h3>
+                </div>
+            </div>
+
+            <!-- 控制列 -->
+            <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-100 flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div class="flex gap-2">
+                    <button onclick="filterByParty('民主進步黨')" class="px-4 py-1.5 text-xs font-bold rounded-full border border-emerald-200 text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition-colors">民進黨</button>
+                    <button onclick="filterByParty('中國國民黨')" class="px-4 py-1.5 text-xs font-bold rounded-full border border-blue-200 text-blue-700 bg-blue-50 hover:bg-blue-100 transition-colors">國民黨</button>
+                    <button onclick="filterByParty('時代力量')" class="px-4 py-1.5 text-xs font-bold rounded-full border border-yellow-300 text-yellow-800 bg-yellow-50 hover:bg-yellow-100 transition-colors">時力</button>
+                    <button onclick="filterByParty('all')" class="px-4 py-1.5 text-xs font-bold rounded-full border border-slate-200 text-slate-600 bg-slate-50 hover:bg-slate-100">全部</button>
+                </div>
+                <div class="flex items-center gap-3">
+                    <label class="text-sm font-medium text-slate-500">排行基準：</label>
+                    <select id="sort-select" onchange="applySort()" class="bg-slate-50 border border-slate-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                        <option value="total-desc">依總收入 (由高至低)</option>
+                        <option value="business-desc">依企業捐贈比例</option>
+                        <option value="personal-desc">依個人捐贈比例</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- 排行列表 -->
+            <div class="bg-white rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100 overflow-hidden">
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead class="bg-slate-50/50 border-b border-slate-100">
+                            <tr>
+                                <th class="px-8 py-5 text-sm font-bold text-slate-400 uppercase">名次</th>
+                                <th class="px-6 py-5 text-sm font-bold text-slate-600">候選人 / 黨籍</th>
+                                <th class="px-6 py-5 text-sm font-bold text-slate-600 text-right">總獻金收入</th>
+                                <th class="px-6 py-5 text-sm font-bold text-slate-600">資金構成 (個人/企業/黨)</th>
+                                <th class="px-6 py-5 text-sm font-bold text-slate-600 text-center">狀態</th>
+                            </tr>
+                        </thead>
+                        <tbody id="results-tbody" class="divide-y divide-slate-100">
+                            <!-- JS 動態渲染 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 分頁 -->
+            <div class="mt-10 flex items-center justify-between">
+                <p id="showing-info" class="text-sm text-slate-400">顯示第 1 - 10 筆</p>
+                <div class="flex gap-2">
+                    <button onclick="changePage(-1)" class="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-30">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+                    <button onclick="changePage(1)" class="p-2 border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-30">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="bg-slate-900 text-slate-500 py-16 px-4 mt-24">
+        <div class="max-w-7xl mx-auto border-t border-slate-800 pt-8 text-center text-xs">
+            © 2016 政治獻金透明化數據庫. 本站資料僅供學術與監督使用。
+        </div>
+    </footer>
+
+    <script>
+        const mockData = [
+            { name: '柯建銘', party: '民主進步黨', region: '新竹市', total: 51641147, personal: 41.60, business: 52.12, partyIncome: 0.00, elected: true },
+            { name: '邱志偉', party: '民主進步黨', region: '高雄市第02選區', total: 38603507, personal: 43.09, business: 55.03, partyIncome: 0.00, elected: true },
+            { name: '蔣萬安', party: '中國國民黨', region: '台北市第03選區', total: 25801200, personal: 35.20, business: 48.30, partyIncome: 12.00, elected: true },
+            { name: '黃國昌', party: '時代力量', region: '新北市第12選區', total: 32004500, personal: 65.40, business: 12.10, partyIncome: 5.00, elected: true },
+            { name: '林郁方', party: '中國國民黨', region: '台北市第05選區', total: 42100300, personal: 20.10, business: 75.40, partyIncome: 4.50, elected: false },
+            { name: '羅致政', party: '民主進步黨', region: '新北市第07選區', total: 29500000, personal: 50.20, business: 45.10, partyIncome: 0.00, elected: true }
+        ];
+
+        // 擴充數據
+        const parties = ['民主進步黨', '中國國民黨', '時代力量', '親民黨', '無黨籍'];
+        for(let i=1; i<=60; i++) {
+            mockData.push({
+                name: `候選人 ${i + 10}`,
+                party: parties[Math.floor(Math.random() * parties.length)],
+                region: `選區 ${Math.floor(Math.random()*10)+1}`,
+                total: Math.floor(Math.random() * 45000000) + 100000,
+                personal: (Math.random() * 80).toFixed(2),
+                business: (Math.random() * 60).toFixed(2),
+                partyIncome: (Math.random() * 20).toFixed(2),
+                elected: Math.random() > 0.5
+            });
+        }
+
+        let currentResults = [...mockData];
+        let currentPage = 1;
+        const itemsPerPage = 10;
+        let activeParty = 'all';
+
+        function showPage(pageId) {
+            const landing = document.getElementById('landing-page');
+            const result = document.getElementById('result-page');
+            if (pageId === 'landing') {
+                landing.classList.remove('hidden-page');
+                result.classList.add('hidden-page');
+            } else {
+                landing.classList.add('hidden-page');
+                result.classList.remove('hidden-page');
+                renderResults();
+            }
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        function filterByParty(party) {
+            activeParty = party;
+            if (party === 'all') {
+                currentResults = [...mockData];
+                document.getElementById('result-title').innerText = '所有政黨排行';
+            } else {
+                currentResults = mockData.filter(item => item.party === party);
+                document.getElementById('result-title').innerText = `${party} 獻金排行`;
+            }
+            applySort(); // 過濾後重新執行排序
+            showPage('result');
+        }
+
+        function applyQuickSort(type) {
+            document.getElementById('sort-select').value = type;
+            filterByParty('all');
+        }
+
+        function applySort() {
+            const sortVal = document.getElementById('sort-select').value;
+            if(sortVal === 'total-desc') currentResults.sort((a,b) => b.total - a.total);
+            else if(sortVal === 'business-desc') currentResults.sort((a,b) => b.business - a.business);
+            else if(sortVal === 'personal-desc') currentResults.sort((a,b) => b.personal - a.personal);
+            currentPage = 1;
+            renderResults();
+        }
+
+        function renderResults() {
+            const tbody = document.getElementById('results-tbody');
+            const start = (currentPage - 1) * itemsPerPage;
+            const end = start + itemsPerPage;
+            const pageData = currentResults.slice(start, end);
+
+            updateSummary();
+
+            tbody.innerHTML = pageData.map((item, index) => {
+                const rank = start + index + 1;
+                let rankClass = '';
+                if(rank === 1) rankClass = 'rank-1';
+                else if(rank === 2) rankClass = 'rank-2';
+                else if(rank === 3) rankClass = 'rank-3';
+
+                return `
+                <tr class="group hover:bg-slate-50 transition-colors">
+                    <td class="px-8 py-6">
+                        <span class="rank-badge ${rankClass} bg-slate-100 text-slate-500">${rank}</span>
+                    </td>
+                    <td class="px-6 py-6">
+                        <div class="font-bold text-slate-900 text-lg group-hover:text-indigo-600 transition-colors">${item.name}</div>
+                        <div class="text-xs text-slate-400 font-medium">${item.party} • ${item.region}</div>
+                    </td>
+                    <td class="px-6 py-6 text-right">
+                        <div class="text-lg font-mono font-bold text-slate-800">NT$ ${item.total.toLocaleString()}</div>
+                    </td>
+                    <td class="px-6 py-6 w-80">
+                        <div class="flex h-1.5 w-full bg-slate-100 rounded-full overflow-hidden mb-2">
+                            <div class="bg-emerald-500" style="width: ${item.personal}%"></div>
+                            <div class="bg-amber-400" style="width: ${item.business}%"></div>
+                            <div class="bg-slate-400" style="width: ${item.partyIncome}%"></div>
+                        </div>
+                        <div class="flex justify-between text-[10px] text-slate-400 font-mono">
+                            <span>個:${item.personal}%</span>
+                            <span>企:${item.business}%</span>
+                            <span>黨:${item.partyIncome}%</span>
+                        </div>
+                    </td>
+                    <td class="px-6 py-6 text-center">
+                        ${item.elected ? 
+                            '<span class="inline-flex items-center gap-1 text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full text-xs font-bold">● 當選</span>' : 
+                            '<span class="text-slate-300 text-xs font-medium">落選</span>'}
+                    </td>
+                </tr>
+                `;
+            }).join('');
+
+            document.getElementById('showing-info').innerText = `顯示第 ${start + 1} - ${Math.min(end, currentResults.length)} 筆 / 共 ${currentResults.length} 筆`;
+        }
+
+        function updateSummary() {
+            const count = currentResults.length;
+            const total = currentResults.reduce((sum, item) => sum + item.total, 0);
+            const avgPersonal = (currentResults.reduce((sum, item) => sum + parseFloat(item.personal), 0) / count || 0).toFixed(1);
+            const avgBusiness = (currentResults.reduce((sum, item) => sum + parseFloat(item.business), 0) / count || 0).toFixed(1);
+
+            document.getElementById('stat-count').innerText = count;
+            document.getElementById('stat-total').innerText = `NT$ ${(total / 1000000).toFixed(1)} M`;
+            document.getElementById('stat-personal-avg').innerText = `${avgPersonal}%`;
+            document.getElementById('stat-business-avg').innerText = `${avgBusiness}%`;
+        }
+
+        function changePage(step) {
+            const maxPage = Math.ceil(currentResults.length / itemsPerPage);
+            const newPage = currentPage + step;
+            if (newPage >= 1 && newPage <= maxPage) {
+                currentPage = newPage;
+                renderResults();
+                window.scrollTo({top: 0, behavior: 'smooth'});
+            }
+        }
+    </script>
+</body>
+</html>
